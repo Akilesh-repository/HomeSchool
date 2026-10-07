@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homeschool Co-Op & Resource Center</title>
+    <script src="tailwind.js"></script>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontWeight: {
+                        semibold: '500',
+                        bold: '600',
+                        extrabold: '800',
+                        black: '900'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* === RESET & CORE === */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* === THEME VARIABLES === */
+        :root {
+            --bg-color: #FAFAFA;
+            --bg-secondary: #FFFBEB;
+            --bg-card: #FFFFFF;
+            --text-main: #1C1917;
+            --text-muted: #78716C;
+            --accent-color: #D97706; 
+            --accent-dark: #B45309; 
+            --border-color: #FEF3C7;
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            --drawer-bg: rgba(255, 255, 255, 0.98);
+            --menu-hover-bg: rgba(217, 119, 6, 0.08);
+        }
+
+        /* DARK MODE */
+        body.dark-mode {
+            --bg-color: #1C1917;
+            --bg-secondary: #292524;
+            --bg-card: #292524;
+            --text-main: #FAFAF9;
+            --text-muted: #A8A29E;
+            --accent-color: #F59E0B;
+            --accent-dark: #D97706;
+            --border-color: #44403C;
+            --nav-bg: rgba(41, 37, 36, 0.85);
+            --drawer-bg: rgba(28, 25, 23, 0.98);
+            --menu-hover-bg: rgba(245, 158, 11, 0.15);
+        }
+
+        /* RTL SUPPORT */
+        [dir="rtl"] { text-align: right; }
+        [dir="rtl"] .ml-auto { margin-right: auto; margin-left: 0; }
+        [dir="rtl"] .mr-auto { margin-left: auto; margin-right: 0; }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 5s ease-in-out infinite; }
+
+        /* === REDESIGNED FLOATING GLASSMORPHISM NAVBAR === */
+        .navbar {
+            position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 32px); max-width: 1400px; z-index: 1000;
+            background: var(--nav-bg); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(217, 119, 6, 0.15);
+            border-radius: 16px;
+            padding: 0 16px; height: 70px; display: flex; align-items: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06);
+        }
+        body.dark-mode .navbar {
+            border-color: rgba(245, 158, 11, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .navbar.scrolled {
+            top: 8px; height: 60px; background: var(--bg-card);
+            border-color: var(--border-color);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* === NEW HOVER EFFECT: SOFT TAB BLOCKS === */
+        .nav-link {
+            position: relative; padding: 6px 10px; margin: 0 1px;
+            color: var(--text-main); text-decoration: none; font-size: 13px; font-weight: 600;
+            text-transform: capitalize; letter-spacing: 0.2px; transition: all 0.3s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+            cursor: pointer; border-radius: 6px; z-index: 1; background: transparent;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--menu-hover-bg);
+            color: var(--accent-color);
+            transform: translateY(-1px);
+        }
+        body.dark-mode .nav-link:hover, body.dark-mode .nav-link.active {
+            color: #FDE68A;
+        }
+
+        .dropdown { position: relative; display: flex; align-items: center; height: 100%; }
+        .dropdown-menu {
+            position: absolute; top: calc(100% + 15px); left: 0;
+            transform: translateY(15px) scale(0.95); opacity: 0; visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100; transform-origin: top left;
+        }
+        .dropdown-inner {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
+            min-width: 200px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); padding: 10px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        body.dark-mode .dropdown-inner { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); }
+        .dropdown:hover .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .dropdown-item {
+            display: block; padding: 8px 14px; border-radius: 6px; color: var(--text-main);
+            text-decoration: none; font-size: 12px; font-weight: 500; text-transform: capitalize;
+            transition: all 0.2s; text-align: left; white-space: nowrap;
+        }
+        .dropdown-item:hover { background: var(--menu-hover-bg); color: var(--accent-color); padding-left: 18px; }
+        [dir="rtl"] .dropdown-item:hover { padding-left: 14px; padding-right: 18px; }
+
+        .theme-toggle-pill {
+            width: 64px; height: 28px; background: var(--bg-secondary); border-radius: 6px;
+            position: relative; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 8px; border: 1px solid var(--border-color); margin: 0 4px;
+        }
+        .theme-toggle-pill i { font-size: 10px; z-index: 1; }
+        .theme-toggle-pill .fa-sun { color: #f59e0b; }
+        .theme-toggle-pill .fa-moon { color: #999; }
+        .theme-toggle-pill .thumb {
+            position: absolute; top: 2px; left: 2px; width: 22px; height: 22px;
+            background: white; border-radius: 4px; transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); z-index: 2; border: 1px solid var(--border-color);
+        }
+        body.dark-mode .theme-toggle-pill .thumb { transform: translateX(36px); background: #333; border-color: var(--border-color); }
+
+        .rtl-btn-style {
+            width: 48px; height: 28px; background: var(--bg-secondary); border-radius: 6px;
+            border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center;
+            font-size: 9px; font-weight: 600; cursor: pointer; color: var(--text-main); transition: all 0.3s ease; margin: 0 4px;
+        }
+        .rtl-btn-style:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+
+        /* HERO SECTION BUTTONS */
+        .btn {
+            padding: 12px 28px; font-weight: 600; font-size: 13px; text-transform: capitalize;
+            letter-spacing: 0.5px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+            position: relative; border: 1px solid transparent; border-radius: 50px; text-decoration: none;
+        }
+        .btn-solid { background: var(--accent-color); color: #FFFFFF !important; }
+        .btn-solid:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 8px 20px -3px rgba(217, 119, 6, 0.4); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-outline:hover { border-color: var(--accent-color); color: var(--accent-color) !important; background: var(--menu-hover-bg); transform: translateY(-2px); }
+
+        /* === IDENTICAL DESIGN FOR LOGIN & REGISTER BUTTONS === */
+        .btn-auth {
+            padding: 0 14px;
+            height: 32px;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+            background: transparent;
+            border: 1.5px solid var(--text-main);
+            border-radius: 6px; 
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            min-width: 80px;
+            margin-left: 6px;
+        }
+        body.dark-mode .btn-auth { border-color: var(--border-color); }
+        
+        .btn-auth:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: var(--menu-hover-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
+        }
+
+        .drawer-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 999;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease; backdrop-filter: blur(4px);
+        }
+        .drawer-overlay.active { opacity: 1; visibility: visible; }
+        
+        .fullscreen-menu {
+            position: fixed; top: 0; right: 0; width: 100%; max-width: 400px; height: 100dvh;
+            background: var(--drawer-bg); z-index: 1001; display: flex; flex-direction: column;
+            opacity: 0; visibility: hidden; transform: translateX(100%);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); border-left: 1px solid var(--border-color);
+        }
+        [dir="rtl"] .fullscreen-menu { right: auto; left: 0; transform: translateX(-100%); border-left: none; border-right: 1px solid var(--border-color); }
+        .fullscreen-menu.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        
+        .mobile-link {
+            display: block; width: 100%; padding: 16px 32px; font-size: 1.1rem; font-weight: 600;
+            text-transform: capitalize; letter-spacing: 0.5px; color: var(--text-main);
+            text-decoration: none; transition: all 0.3s; border-bottom: 1px solid var(--border-color);
+        }
+        .mobile-link:hover { color: var(--accent-color); padding-left: 40px; background: var(--menu-hover-bg); }
+        [dir="rtl"] .mobile-link:hover { padding-left: 32px; padding-right: 40px; }
+
+        footer { background: var(--bg-secondary); border-top: 1px solid var(--border-color); padding-top: 80px; }
+        footer h4 { color: var(--text-main); font-weight: 600; font-size: 1.1rem; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        footer a, footer li, footer span { color: var(--text-muted); text-decoration: none; transition: all 0.3s; font-size: 0.95rem; font-weight: 400; }
+        footer a:hover { color: var(--accent-color); }
+        .social-link-circle {
+            width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: center; transition: all 0.3s;
+            color: var(--text-main); background: transparent;
+        }
+        .social-link-circle:hover { background: var(--accent-color); border-color: var(--accent-color); color: #FFFFFF; transform: translateY(-3px); }
+        .footer-bottom { border-top: 1px solid var(--border-color); padding: 32px 0; margin-top: 60px; }
+    </style>
+</head>
+<body>
+
+    <!-- === REDESIGNED NAVBAR === -->
+    <nav class="navbar" id="main-nav">
+        <div class="w-full flex items-center justify-between">
+            <div class="flex items-center flex-shrink-0 mr-2">
+                <a href="index.html" class="inline-flex items-center gap-2 text-lg md:text-xl font-bold tracking-wider whitespace-nowrap" style="color: var(--text-main) !important; text-decoration: none;">
+                    <i class="fas fa-book-reader" style="color: var(--accent-color);"></i>
+                    HomeSchool
+                </a>
+            </div>
+
+            <!-- COMPACT LINKS -->
+            <div class="hidden xl:flex justify-center items-center flex-1">
+                <div class="dropdown">
+                    <div class="nav-link active">Home <i class="fas fa-chevron-down text-[8px] ml-1 opacity-50"></i></div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-inner">
+                            <a href="index.html" class="dropdown-item">Home Page 1</a>
+                            <a href="home-2.html" class="dropdown-item">Home Page 2</a>
+                        </div>
+                    </div>
+                </div>
+                <a href="about.html" class="nav-link">About</a>
+                <a href="services.html" class="nav-link">Services</a>
+                <a href="pricing.html" class="nav-link">Pricing</a>
+                <a href="blog.html" class="nav-link">Blog</a>
+                <a href="faq.html" class="nav-link">FAQ</a>
+                <a href="contact.html" class="nav-link">Contact</a>
+                <div class="dropdown">
+                    <div class="nav-link">Dashboard <i class="fas fa-chevron-down text-[8px] ml-1 opacity-50"></i></div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-inner">
+                            <a href="user.html" class="dropdown-item">User Dashboard</a>
+                            <a href="admin.html" class="dropdown-item">Admin Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hidden xl:flex items-center flex-shrink-0 ml-2">
+                <div id="theme-toggle-desktop" class="theme-toggle-pill" title="Toggle Dark Mode">
+                    <i class="fas fa-sun"></i><i class="fas fa-moon"></i>
+                    <div class="thumb"></div>
+                </div>
+                <button id="rtl-btn" class="rtl-btn-style" title="Toggle LTR/RTL">LTR</button>
+                <div class="w-px h-5 bg-[var(--border-color)] mx-1"></div>
+
+                <!-- COMPACT AUTH BUTTONS -->
+                <a href="login.html" class="btn-auth">Login</a>
+                <a href="register.html" class="btn-auth">Register</a>
+            </div>
+
+            <div class="xl:hidden flex items-center justify-end gap-4">
+                <button id="mobile-btn" class="text-2xl text-[var(--text-main)] transition-colors hover:text-[var(--accent-color)]">
+                    <i class="fas fa-bars-staggered"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- === HAMBURGER MENU DRAWER === -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <div class="fullscreen-menu" id="fullscreen-menu">
+        <div class="w-full px-8 py-6 flex justify-between items-center shrink-0 border-b border-[var(--border-color)]">
+            <a href="index.html" class="inline-flex items-center gap-2 text-2xl font-bold tracking-wider" style="color: var(--text-main) !important; text-decoration: none;">
+                <i class="fas fa-book-reader" style="color: var(--accent-color); font-size: 1.4rem;"></i>
+                HomeSchool
+            </a>
+            <button id="close-menu" class="w-10 h-10 rounded-full flex items-center justify-center transition-all text-xl text-[var(--text-main)] hover:bg-[var(--bg-secondary)] hover:text-[var(--accent-color)]">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="flex flex-col w-full overflow-y-auto flex-1 py-4">
+            <a href="index.html" class="mobile-link" style="color: var(--accent-color);">Home Page 1</a>
+            <a href="home-2.html" class="mobile-link">Home Page 2</a>
+            <a href="about.html" class="mobile-link">About</a>
+            <a href="services.html" class="mobile-link">Services</a>
+            <a href="pricing.html" class="mobile-link">Pricing</a>
+            <a href="blog.html" class="mobile-link">Blog</a>
+            <a href="faq.html" class="mobile-link">FAQ</a>
+            <a href="contact.html" class="mobile-link">Contact</a>
+            <div class="px-8 mt-6 mb-2">
+                <span class="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest">Portals</span>
+            </div>
+            <a href="user.html" class="mobile-link !text-sm text-[var(--text-muted)]">User Dashboard</a>
+            <a href="admin.html" class="mobile-link !text-sm text-[var(--text-muted)]">Admin Dashboard</a>
+        </div>
+
+        <div class="w-full px-8 py-8 border-t border-[var(--border-color)] flex flex-col gap-6 shrink-0 bg-[var(--bg-secondary)]">
+            <div class="flex justify-between items-center w-full">
+                <div class="flex items-center gap-3">
+                    <span class="text-[var(--text-muted)] font-medium text-[10px] uppercase tracking-widest">Theme</span>
+                    <div id="theme-toggle-mobile" class="theme-toggle-pill"><i class="fas fa-sun"></i><i class="fas fa-moon"></i>
+                        <div class="thumb"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-[var(--text-muted)] font-medium text-[10px] uppercase tracking-widest">Dir</span>
+                    <button id="rtl-toggle-mobile" class="rtl-btn-style">LTR</button>
+                </div>
+            </div>
+            <div class="flex gap-4 w-full">
+                <a href="login.html" class="btn-auth flex-1 !h-[48px] !m-0">Login</a>
+                <a href="register.html" class="btn-auth flex-1 !h-[48px] !m-0">Register</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- === NEW CREATIVE HERO BANNER === -->
+    <section class="relative w-full min-h-[100dvh] pb-16 lg:pb-0 pt-[120px] lg:pt-[140px] flex items-center justify-center overflow-hidden bg-[var(--bg-color)]">
+        
+        <!-- Abstract Background Shapes -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+            <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] rounded-full bg-[var(--accent-color)] opacity-5 blur-[120px] animate-float"></div>
+            <div class="absolute bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] rounded-full bg-[#FBBF24] opacity-5 blur-[100px] animate-float" style="animation-delay: 2s;"></div>
+        </div>
+
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12 w-full flex flex-col lg:flex-row gap-12 lg:gap-8 items-center relative z-10">
+            
+            <!-- Left: Content -->
+            <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
+                
+                <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] mb-8 shadow-sm">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-color)] opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-[var(--accent-color)]"></span>
+                    </span>
+                    <span class="text-[11px] font-bold uppercase tracking-widest text-[var(--text-main)]">Enrolling Fall 2026</span>
+                </div>
+                
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-[5rem] font-black leading-[1.05] mb-6 text-[var(--text-main)] tracking-tight">
+                    Education <br class="hidden lg:block">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-color)] to-[var(--accent-dark)]">Without Borders.</span>
+                </h1>
+                
+                <p class="text-[var(--text-muted)] text-base md:text-lg leading-relaxed font-medium mb-10 max-w-xl">
+                    Discover a vibrant community where homeschooling families unite. Share resources, participate in expert-led group classes, and give your children the ultimate collaborative learning experience.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <a href="services.html" class="btn btn-solid !py-4 !px-8 text-sm shadow-[0_8px_20px_-6px_rgba(217,119,6,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(217,119,6,0.6)]">
+                        Explore Programs <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="contact.html" class="btn btn-outline !py-4 !px-8 text-sm bg-[var(--bg-card)] flex items-center justify-center">
+                        <i class="fas fa-play-circle mr-2 text-[var(--accent-color)] text-lg"></i> Watch Video
+                    </a>
+                </div>
+
+                <div class="mt-12 flex items-center gap-4 border-t border-[var(--border-color)] pt-6 w-full max-w-md justify-center lg:justify-start">
+                    <div class="flex -space-x-3">
+                        <img class="w-10 h-10 rounded-full border-2 border-[var(--bg-card)] object-cover" src="images/pexels-kampus-7079148.jpg" alt="Parent">
+                        <img class="w-10 h-10 rounded-full border-2 border-[var(--bg-card)] object-cover" src="images/pexels-boom-12716037.jpg" alt="Parent">
+                        <img class="w-10 h-10 rounded-full border-2 border-[var(--bg-card)] object-cover" src="images/pexels-kseniachernaya-7695252.jpg" alt="Parent">
+                        <div class="w-10 h-10 rounded-full border-2 border-[var(--bg-card)] bg-[var(--bg-secondary)] flex items-center justify-center text-[10px] font-bold text-[var(--accent-color)]">500+</div>
+                    </div>
+                    <div class="text-sm font-semibold text-[var(--text-main)]">
+                        Trusted by families <br> <span class="text-[var(--text-muted)] font-normal text-xs">across the state</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Creative Grid Collage -->
+            <div class="flex-1 w-full relative min-h-[450px] lg:min-h-[650px] flex items-center justify-center mt-10 lg:mt-0">
+                <!-- Center Image (Main) -->
+                <div class="absolute z-20 w-[48%] aspect-[3/4] rounded-[40px] overflow-hidden border-8 border-[var(--bg-card)] shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <img src="images/pexels-august-de-richelieu-4260477.jpg" alt="Homeschooling Parent and Child" class="w-full h-full object-cover">
+                </div>
+                
+                <!-- Top Left Image (Circular) -->
+                <div class="absolute z-10 w-[42%] aspect-square rounded-full overflow-hidden border-8 border-[var(--bg-card)] shadow-xl top-[2%] left-[2%] transform -rotate-6 hover:scale-105 transition-transform duration-500">
+                    <img src="images/pexels-cottonbro-7014775.jpg" alt="Children Reading" class="w-full h-full object-cover">
+                </div>
+
+                <!-- Bottom Right Image (Rounded Rectangle) -->
+                <div class="absolute z-30 w-[45%] aspect-[4/3] rounded-3xl overflow-hidden border-8 border-[var(--bg-card)] shadow-xl bottom-[8%] right-[0%] transform -rotate-2 hover:scale-105 transition-transform duration-500">
+                    <img src="images/pexels-kampus-6248420.jpg" alt="Science Lab" class="w-full h-full object-cover">
+                    <!-- Floating Badge -->
+                    <div class="absolute bottom-4 right-4 bg-[var(--bg-card)]/90 backdrop-blur px-3 py-2 rounded-xl shadow-lg border border-[var(--border-color)] flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-[var(--accent-color)]/20 flex items-center justify-center text-[var(--accent-color)]">
+                            <i class="fas fa-microscope text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase text-[var(--text-main)] leading-tight">STEM Labs</p>
+                            <p class="text-[9px] text-[var(--text-muted)] font-medium">Fully Equipped</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- === MAIN CONTENT === -->
+    <main class="w-full flex flex-col">
+
+        <!-- === SECTION 1: ABOUT US & PHILOSOPHY (60 LINES) === -->
+        <section class="w-full py-24 bg-[var(--bg-color)] border-b border-[var(--border-color)] relative overflow-hidden">
+            <div class="absolute -right-[20%] top-[10%] w-[50vw] h-[50vw] rounded-full bg-[var(--bg-secondary)] opacity-40 blur-3xl z-0 pointer-events-none"></div>
+            <div class="max-w-[1440px] mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
+                <div class="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border-4 border-[var(--bg-card)] order-2 lg:order-1 group">
+                    <img src="images/pexels-cottonbro-7014772.jpg" alt="Children Learning Together" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-color)] to-transparent opacity-40"></div>
+                    <div class="absolute bottom-6 left-6 right-6 bg-[var(--bg-card)]/90 backdrop-blur-md p-5 rounded-2xl border border-[var(--border-color)] shadow-lg transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center text-[var(--accent-color)] text-xl"><i class="fas fa-heart"></i></div>
+                            <div>
+                                <h4 class="text-[var(--text-main)] font-bold text-sm">Parent-Led Initiative</h4>
+                                <p class="text-[var(--text-muted)] text-xs font-medium">Built by families, for families.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col items-start order-1 lg:order-2">
+                    <span class="text-[var(--accent-color)] text-xs font-bold uppercase tracking-widest mb-3 border-b-2 border-[var(--accent-color)] pb-1 inline-block">Our Philosophy</span>
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[var(--text-main)] mb-6 leading-tight tracking-tight">Nurturing Minds in a <br><span class="text-[var(--accent-color)]">Supportive Environment</span></h2>
+                    <p class="text-[var(--text-muted)] text-lg leading-relaxed mb-6 font-medium">
+                        We believe that homeschooling doesn't mean doing it alone. Our resource center provides a safe, enriching space where parents and students collaborate, share knowledge, and foster lifelong friendships.
+                    </p>
+                    <p class="text-[var(--text-muted)] text-base leading-relaxed mb-8">
+                        By pooling our resources, skills, and diverse backgrounds, we create comprehensive learning experiences that rival top-tier private academies, while maintaining the personalized touch of home education.
+                    </p>
+                    <ul class="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+                        <li class="flex items-center gap-3 text-[var(--text-main)] font-semibold text-sm bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-color)]">
+                            <i class="fas fa-check-circle text-[var(--accent-color)]"></i> Shared Curriculum Library
+                        </li>
+                        <li class="flex items-center gap-3 text-[var(--text-main)] font-semibold text-sm bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-color)]">
+                            <i class="fas fa-check-circle text-[var(--accent-color)]"></i> Certified Parent Tutors
+                        </li>
+                        <li class="flex items-center gap-3 text-[var(--text-main)] font-semibold text-sm bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-color)]">
+                            <i class="fas fa-check-circle text-[var(--accent-color)]"></i> Flexible Scheduling
+                        </li>
+                        <li class="flex items-center gap-3 text-[var(--text-main)] font-semibold text-sm bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-color)]">
+                            <i class="fas fa-check-circle text-[var(--accent-color)]"></i> Secure Learning Spaces
+                        </li>
+                    </ul>
+                    <a href="about.html" class="btn btn-solid shadow-lg shadow-[var(--accent-color)]/20 hover:-translate-y-1">Discover Our Story <i class="fas fa-arrow-right ml-2 text-xs"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- === SECTION 2: PROGRAMS & HIGHLIGHTS (60 LINES) === -->
+        <section class="w-full py-24 bg-[var(--bg-secondary)] border-b border-[var(--border-color)] relative">
+            <div class="max-w-[1440px] mx-auto px-6 lg:px-12 flex flex-col items-center">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <span class="text-[var(--accent-color)] text-xs font-bold uppercase tracking-widest mb-3 block">What We Offer</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-[var(--text-main)] mb-6 tracking-tight">Enrichment Programs</h2>
+                    <div class="w-20 h-1 bg-gradient-to-r from-[var(--accent-color)] to-[var(--accent-dark)] mx-auto rounded-full mb-6"></div>
+                    <p class="text-[var(--text-muted)] text-lg font-medium">Explore our diverse range of classes designed to supplement your home curriculum with hands-on, interactive group learning.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
+                    <!-- Card 1 -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-400 group flex flex-col h-full transform hover:-translate-y-2">
+                        <div class="relative w-full h-56 overflow-hidden">
+                            <img src="images/pexels-kampus-6248420.jpg" alt="STEM Lab" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute top-4 right-4 bg-[var(--accent-color)] text-white text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full tracking-wider shadow-md">Ages 8-14</div>
+                        </div>
+                        <div class="p-8 flex flex-col flex-1">
+                            <div class="w-12 h-12 bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-[var(--accent-color)] text-xl mb-6 border border-[var(--border-color)]"><i class="fas fa-flask"></i></div>
+                            <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">STEM Explorers Lab</h3>
+                            <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-6 flex-1 font-medium">Weekly hands-on experiments covering biology, physics, and introductory robotics. Perfect for curious minds wanting practical science experience.</p>
+                            <a href="services.html" class="text-[var(--accent-color)] font-bold text-sm uppercase tracking-wide hover:text-[var(--accent-dark)] flex items-center gap-2 transition-colors">View Curriculum <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-400 group flex flex-col h-full transform hover:-translate-y-2">
+                        <div class="relative w-full h-56 overflow-hidden">
+                            <img src="images/pexels-tima-miroshnichenko-5303546.jpg" alt="Creative Arts" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute top-4 right-4 bg-[var(--accent-color)] text-white text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full tracking-wider shadow-md">All Ages</div>
+                        </div>
+                        <div class="p-8 flex flex-col flex-1">
+                            <div class="w-12 h-12 bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-[var(--accent-color)] text-xl mb-6 border border-[var(--border-color)]"><i class="fas fa-palette"></i></div>
+                            <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Creative Arts Studio</h3>
+                            <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-6 flex-1 font-medium">From water colors and clay sculpting to digital design. Our art program allows students to express themselves while learning fundamental techniques.</p>
+                            <a href="services.html" class="text-[var(--accent-color)] font-bold text-sm uppercase tracking-wide hover:text-[var(--accent-dark)] flex items-center gap-2 transition-colors">View Curriculum <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-400 group flex flex-col h-full transform hover:-translate-y-2">
+                        <div class="relative w-full h-56 overflow-hidden">
+                            <img src="images/pexels-gustavo-fring-3874375.jpg" alt="Literature" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute top-4 right-4 bg-[var(--accent-color)] text-white text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-full tracking-wider shadow-md">Ages 12-18</div>
+                        </div>
+                        <div class="p-8 flex flex-col flex-1">
+                            <div class="w-12 h-12 bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center text-[var(--accent-color)] text-xl mb-6 border border-[var(--border-color)]"><i class="fas fa-book-open"></i></div>
+                            <h3 class="text-xl font-bold text-[var(--text-main)] mb-3">Classic Literature Circle</h3>
+                            <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-6 flex-1 font-medium">Deep dive group discussions into classic novels, historical texts, and poetry. Focuses on critical thinking, reading comprehension, and debate skills.</p>
+                            <a href="services.html" class="text-[var(--accent-color)] font-bold text-sm uppercase tracking-wide hover:text-[var(--accent-dark)] flex items-center gap-2 transition-colors">View Curriculum <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === SECTION 3: COMMUNITY & EVENTS GRID (60 LINES) === -->
+        <section class="w-full py-24 bg-[var(--bg-color)] border-b border-[var(--border-color)]">
+            <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                    <div class="max-w-xl">
+                        <span class="text-[var(--accent-color)] text-xs font-bold uppercase tracking-widest mb-3 block">Life at the Center</span>
+                        <h2 class="text-3xl md:text-5xl font-extrabold text-[var(--text-main)] tracking-tight">Community Moments</h2>
+                    </div>
+                    <a href="blog.html" class="btn btn-outline shrink-0">View Event Calendar</a>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-auto lg:h-[600px]">
+                    <!-- Large Feature Image -->
+                    <div class="lg:col-span-7 relative rounded-3xl overflow-hidden group h-[400px] lg:h-full border border-[var(--border-color)]">
+                        <img src="images/pexels-helenalopes-27177921.jpg" alt="Outdoor Field Trip" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        <div class="absolute bottom-8 left-8 right-8 text-white z-10">
+                            <span class="bg-[var(--accent-color)] text-[10px] font-bold uppercase px-3 py-1 rounded-full mb-3 inline-block">Field Trips</span>
+                            <h3 class="text-2xl md:text-3xl font-bold mb-2">Monthly Nature Reserve Excursions</h3>
+                            <p class="text-gray-300 text-sm md:text-base font-medium max-w-lg">Taking education outdoors. Join multiple families as we explore local biology and geography directly in the field.</p>
+                        </div>
+                    </div>
+                    <!-- Two Smaller Stacked Images -->
+                    <div class="lg:col-span-5 flex flex-col gap-6 h-full">
+                        <div class="relative flex-1 rounded-3xl overflow-hidden group border border-[var(--border-color)] min-h-[250px]">
+                            <img src="images/pexels-sofatutor-95841679-9240632.jpg" alt="Parent Workshops" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                            <div class="absolute bottom-6 left-6 right-6 text-white z-10">
+                                <span class="bg-blue-600 text-[10px] font-bold uppercase px-3 py-1 rounded-full mb-2 inline-block">Parents</span>
+                                <h3 class="text-xl font-bold mb-1">Curriculum Planning Workshops</h3>
+                                <p class="text-gray-300 text-xs font-medium">Monthly sessions for parents to align goals.</p>
+                            </div>
+                        </div>
+                        <div class="relative flex-1 rounded-3xl overflow-hidden group border border-[var(--border-color)] min-h-[250px]">
+                            <img src="images/pexels-werner-pfennig-6482235.jpg" alt="Indoor Play" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                            <div class="absolute bottom-6 left-6 right-6 text-white z-10">
+                                <span class="bg-green-600 text-[10px] font-bold uppercase px-3 py-1 rounded-full mb-2 inline-block">Social</span>
+                                <h3 class="text-xl font-bold mb-1">Friday Free-Play Mixers</h3>
+                                <p class="text-gray-300 text-xs font-medium">Building social skills in a supervised, fun environment.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === SECTION 4: WHY CHOOSE US (60 LINES) === -->
+        <section class="w-full py-24 bg-[var(--bg-secondary)] border-b border-[var(--border-color)] overflow-hidden">
+            <div class="max-w-[1440px] mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="flex flex-col items-start order-2 lg:order-1">
+                    <span class="text-[var(--accent-color)] text-xs font-bold uppercase tracking-widest mb-3 border-b-2 border-[var(--accent-color)] pb-1 inline-block">The Advantage</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-[var(--text-main)] mb-6 tracking-tight leading-tight">Empowering Parents,<br>Inspiring Students.</h2>
+                    <p class="text-[var(--text-muted)] text-lg leading-relaxed mb-8 font-medium">Choosing a Co-Op brings the best of both worlds: the autonomy of homeschooling combined with the rich social and academic resources of a traditional school.</p>
+
+                    <div class="space-y-6 w-full mb-10">
+                        <div class="flex items-start gap-5 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] shadow-sm hover:shadow-md transition-shadow">
+                            <div class="w-12 h-12 shrink-0 bg-[var(--bg-secondary)] rounded-full flex items-center justify-center text-[var(--accent-color)] text-xl border border-[var(--border-color)]"><i class="fas fa-layer-group"></i></div>
+                            <div>
+                                <h4 class="text-[var(--text-main)] font-bold text-base mb-1">Extensive Resource Library</h4>
+                                <p class="text-[var(--text-muted)] text-sm font-medium">Access thousands of books, microscopes, art supplies, and educational board games without the hefty individual price tag.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-5 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] shadow-sm hover:shadow-md transition-shadow">
+                            <div class="w-12 h-12 shrink-0 bg-[var(--bg-secondary)] rounded-full flex items-center justify-center text-[var(--accent-color)] text-xl border border-[var(--border-color)]"><i class="fas fa-users"></i></div>
+                            <div>
+                                <h4 class="text-[var(--text-main)] font-bold text-base mb-1">Diverse Socialization</h4>
+                                <p class="text-[var(--text-muted)] text-sm font-medium">Students interact across age groups in structured and unstructured settings, fostering empathy, leadership, and diverse perspectives.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-5 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-color)] shadow-sm hover:shadow-md transition-shadow">
+                            <div class="w-12 h-12 shrink-0 bg-[var(--bg-secondary)] rounded-full flex items-center justify-center text-[var(--accent-color)] text-xl border border-[var(--border-color)]"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div>
+                                <h4 class="text-[var(--text-main)] font-bold text-base mb-1">Cost-Effective Education</h4>
+                                <p class="text-[var(--text-muted)] text-sm font-medium">By sharing the cost of specialized tutors and facility upkeep, families receive elite educational support at a fraction of private school tuition.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative w-full aspect-[4/5] lg:aspect-auto lg:h-[700px] rounded-[40px] overflow-hidden border-8 border-[var(--bg-card)] shadow-2xl order-1 lg:order-2">
+                    <img src="images/pexels-mikhail-nilov-8121107.jpg" alt="Happy Homeschool Family" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-color)]/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-10 left-10 bg-[var(--bg-card)] p-4 pr-6 rounded-2xl shadow-xl border border-[var(--border-color)] flex items-center gap-4 animate-float">
+                        <div class="text-[var(--accent-color)] text-3xl"><i class="fas fa-award"></i></div>
+                        <div>
+                            <p class="text-[var(--text-main)] font-bold text-xl leading-tight">500+</p>
+                            <p class="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest">Active Families</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === SECTION 5: TESTIMONIALS (60 LINES) === -->
+        <section class="w-full py-24 bg-[var(--bg-color)] border-b border-[var(--border-color)]">
+            <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+                <div class="text-center mb-20 max-w-2xl mx-auto">
+                    <span class="text-[var(--accent-color)] text-xs font-bold uppercase tracking-widest mb-3 block">Family Voices</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-[var(--text-main)] mb-6 tracking-tight">Hear From Our Community</h2>
+                    <div class="w-16 h-1 bg-[var(--accent-color)] mx-auto mb-6 rounded-full"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <!-- Review 1 -->
+                    <div class="bg-[var(--bg-card)] p-8 rounded-3xl shadow-lg border border-[var(--border-color)] relative pt-12 mt-8 hover:-translate-y-2 transition-transform duration-300 flex flex-col">
+                        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-20 h-20 rounded-full overflow-hidden border-4 border-[var(--bg-card)] shadow-md">
+                            <img src="images/pexels-kampus-7079148.jpg" alt="Parent 1" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex justify-center text-[#f59e0b] text-sm mb-6"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        <i class="fas fa-quote-left text-3xl text-[var(--border-color)] absolute top-6 left-6 opacity-50"></i>
+                        <p class="text-[var(--text-muted)] font-medium leading-relaxed mb-6 text-center italic flex-grow relative z-10">"Joining the Co-Op was the turning point for our homeschooling journey. My kids finally have the science lab access we lacked at home, and the Friday social events are the highlight of their week."</p>
+                        <div class="border-t border-[var(--border-color)] pt-4 text-center">
+                            <h4 class="font-bold text-[var(--text-main)] text-sm uppercase tracking-wider">Sarah Jenkins</h4>
+                            <span class="text-[var(--accent-color)] text-xs font-semibold">Member since 2023</span>
+                        </div>
+                    </div>
+                    <!-- Review 2 -->
+                    <div class="bg-[var(--bg-card)] p-8 rounded-3xl shadow-lg border border-[var(--border-color)] relative pt-12 mt-8 hover:-translate-y-2 transition-transform duration-300 flex flex-col">
+                        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-20 h-20 rounded-full overflow-hidden border-4 border-[var(--bg-card)] shadow-md">
+                            <img src="images/pexels-kseniachernaya-7695252.jpg" alt="Parent 2" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex justify-center text-[#f59e0b] text-sm mb-6"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        <i class="fas fa-quote-left text-3xl text-[var(--border-color)] absolute top-6 left-6 opacity-50"></i>
+                        <p class="text-[var(--text-muted)] font-medium leading-relaxed mb-6 text-center italic flex-grow relative z-10">"The parent workshops have been invaluable. I've learned how to structure my curriculum better and found a network of moms who truly support each other through the tough days."</p>
+                        <div class="border-t border-[var(--border-color)] pt-4 text-center">
+                            <h4 class="font-bold text-[var(--text-main)] text-sm uppercase tracking-wider">Elena Rodriguez</h4>
+                            <span class="text-[var(--accent-color)] text-xs font-semibold">Member since 2024</span>
+                        </div>
+                    </div>
+                    <!-- Review 3 -->
+                    <div class="bg-[var(--bg-card)] p-8 rounded-3xl shadow-lg border border-[var(--border-color)] relative pt-12 mt-8 hover:-translate-y-2 transition-transform duration-300 flex flex-col">
+                        <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-20 h-20 rounded-full overflow-hidden border-4 border-[var(--bg-card)] shadow-md">
+                            <img src="images/pexels-boom-12716037.jpg" alt="Parent 3" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex justify-center text-[#f59e0b] text-sm mb-6"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                        <i class="fas fa-quote-left text-3xl text-[var(--border-color)] absolute top-6 left-6 opacity-50"></i>
+                        <p class="text-[var(--text-muted)] font-medium leading-relaxed mb-6 text-center italic flex-grow relative z-10">"As a working dad who shares homeschooling duties, the flexible schedule and drop-in tutoring sessions have saved us. The facility is incredibly safe and the resource library is massive."</p>
+                        <div class="border-t border-[var(--border-color)] pt-4 text-center">
+                            <h4 class="font-bold text-[var(--text-main)] text-sm uppercase tracking-wider">David Chen</h4>
+                            <span class="text-[var(--accent-color)] text-xs font-semibold">Member since 2022</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === SECTION 6: CALL TO ACTION (60 LINES) === -->
+        <section class="w-full py-24 bg-[var(--bg-color)] relative overflow-hidden">
+            <div class="max-w-[1200px] mx-auto px-6 lg:px-12 relative z-10">
+                <div class="rounded-[40px] shadow-2xl border border-[var(--border-color)] overflow-hidden relative group">
+                    <div class="absolute inset-0 z-0">
+                        <img src="images/pexels-cottonbro-7014775.jpg" alt="Children studying" class="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-[#1C1917]/80 backdrop-blur-[2px]"></div>
+                    </div>
+
+                    <div class="relative z-10 p-12 md:p-20 flex flex-col items-center justify-center text-center">
+                        <div class="w-16 h-16 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white text-2xl mb-8 shadow-[0_0_30px_rgba(217,119,6,0.5)]">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <span class="text-[var(--accent-color)] text-sm font-bold uppercase tracking-widest mb-4 block">Fall Enrollment is Open</span>
+                        <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-tight max-w-3xl">
+                            Ready to Transform Your <br>Homeschooling Experience?
+                        </h2>
+                        <p class="text-gray-300 text-lg mb-10 max-w-2xl font-medium">
+                            Secure your family's spot for the upcoming semester. Gain immediate access to our digital portals, resource library reservations, and upcoming orientation events.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
+                            <a href="register.html" class="btn btn-solid !py-4 !px-10 text-sm shadow-lg shadow-[var(--accent-color)]/30 hover:scale-105 transition-transform">
+                                <i class="fas fa-user-plus mr-2"></i> Become a Member
+                            </a>
+                            <a href="contact.html" class="btn bg-white/10 text-white border border-white/20 hover:bg-white/20 hover:border-white/40 backdrop-blur-sm !py-4 !px-10 text-sm transition-all">
+                                <i class="fas fa-calendar-alt mr-2"></i> Schedule a Tour
+                            </a>
+                        </div>
+                        <p class="text-gray-400 text-xs mt-8 font-medium tracking-wide uppercase">Limited space available in upper-level science labs.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- === FOOTER === -->
+    <footer>
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-10 pt-4">
+                <div class="lg:col-span-4">
+                    <div class="mb-6">
+                        <a href="index.html" class="inline-flex items-center gap-2 text-2xl font-bold tracking-wider" style="color: var(--text-main) !important; text-decoration: none;">
+                            <i class="fas fa-book-reader" style="color: var(--accent-color); font-size: 1.4rem;"></i>
+                            HomeSchool
+                        </a>
+                    </div>
+                    <p class="opacity-80 leading-relaxed text-sm font-medium mb-8 max-w-sm" style="color: var(--text-muted);">
+                        Dedicated to providing educational resources, collaborative classes, and community support for homeschooling families. Empowering parents and inspiring students every day.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="social-link-circle"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link-circle"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link-circle"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link-circle"><i class="fab fa-pinterest-p"></i></a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-8">
+                    <!-- EXACT FILE REDIRECTS USED FOR FOOTER TOO -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+                        <div>
+                            <h4>Parent Portal</h4>
+                            <ul class="space-y-4">
+                                <li><a href="login.html">Member Login</a></li>
+                                <li><a href="user.html">Family Dashboard</a></li>
+                                <li><a href="pricing.html">Membership Plans</a></li>
+                                <li><a href="blog.html">Educational Blog</a></li>
+                                <li><a href="faq.html">Co-Op FAQ</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4>Resources</h4>
+                            <ul class="space-y-4">
+                                <li><a href="services.html">Curriculum Library</a></li>
+                                <li><a href="services.html">Group Classes</a></li>
+                                <li><a href="services.html">Field Trips</a></li>
+                                <li><a href="services.html">Tutoring Sessions</a></li>
+                                <li><a href="services.html">Parent Workshops</a></li>
+                            </ul>
+                        </div>
+                        <div class="sm:col-span-2 md:col-span-1">
+                            <h4>Center Location</h4>
+                            <ul class="space-y-4 text-[var(--text-muted)] text-sm font-medium">
+                                <li class="flex items-start gap-4">
+                                    <i class="fas fa-map-marker-alt mt-1 shrink-0" style="color: var(--accent-color);"></i>
+                                    <span>456 Learning Way<br>Education City, TX 75002</span>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <i class="fas fa-phone shrink-0" style="color: var(--accent-color);"></i>
+                                    <a href="tel:+15551234" class="break-all hover:text-[var(--accent-color)]">+1 (555) 123-COOP</a>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <i class="fas fa-envelope shrink-0" style="color: var(--accent-color);"></i>
+                                    <a href="contact.html" class="break-all hover:text-[var(--accent-color)]">hello@homeschoolcoop.org</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom flex flex-col md:flex-row justify-between items-center text-xs gap-6 font-semibold uppercase tracking-widest">
+                <p style="color: var(--text-muted);">&copy; 2026 Homeschool Co-Op & Resource Center. All rights reserved.</p>
+                <div class="flex flex-wrap justify-center gap-6 sm:gap-8">
+                    <a href="#">Membership Terms</a>
+                    <a href="#">Code of Conduct</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- === JAVASCRIPT CORE === -->
+    <script>
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('main-nav');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        const mobileBtn = document.getElementById('mobile-btn');
+        const fullscreenMenu = document.getElementById('fullscreen-menu');
+        const closeMenu = document.getElementById('close-menu');
+        const drawerOverlay = document.getElementById('drawer-overlay');
+
+        function toggleMenu() {
+            fullscreenMenu.classList.toggle('active');
+            drawerOverlay.classList.toggle('active');
+            document.body.style.overflow = fullscreenMenu.classList.contains('active') ? 'hidden' : 'auto';
+        }
+        mobileBtn.onclick = toggleMenu;
+        closeMenu.onclick = toggleMenu;
+        drawerOverlay.onclick = toggleMenu;
+
+        const themeDesktop = document.getElementById('theme-toggle-desktop');
+        const themeMobile = document.getElementById('theme-toggle-mobile');
+        const theme = localStorage.getItem('theme') || 'light';
+
+        function updateThemeUI(isDark) {
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                if (themeMobile) themeMobile.classList.add('active');
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (themeMobile) themeMobile.classList.remove('active');
+            }
+        }
+        updateThemeUI(theme === 'dark');
+
+        function toggleTheme() {
+            const isDark = !document.body.classList.contains('dark-mode');
+            updateThemeUI(isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+        themeDesktop.onclick = toggleTheme;
+        if (themeMobile) themeMobile.onclick = toggleTheme;
+
+        const rtlBtn = document.getElementById('rtl-btn');
+        const rtlMobile = document.getElementById('rtl-toggle-mobile');
+        const dir = localStorage.getItem('dir') || 'ltr';
+
+        function updateRTLUI(currentDir) {
+            const isRTL = currentDir === 'rtl';
+            if (rtlBtn) rtlBtn.innerText = isRTL ? 'RTL' : 'LTR';
+            if (rtlMobile) rtlMobile.innerText = isRTL ? 'RTL' : 'LTR';
+        }
+        if (dir === 'rtl') {
+            document.documentElement.dir = 'rtl';
+        }
+        updateRTLUI(dir);
+
+        function toggleRTL() {
+            const isRTL = document.documentElement.dir === 'rtl';
+            const newDir = isRTL ? 'ltr' : 'rtl';
+            document.documentElement.dir = newDir;
+            localStorage.setItem('dir', newDir);
+            updateRTLUI(newDir);
+        }
+        if (rtlBtn) rtlBtn.onclick = toggleRTL;
+        if (rtlMobile) rtlMobile.onclick = toggleRTL;
+    </script>
+</body>
+</html>

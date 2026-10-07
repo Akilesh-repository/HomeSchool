@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Homeschool Co-Op</title>
+    <script src="tailwind.js"></script>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontWeight: {
+                        semibold: '500',
+                        bold: '600',
+                        extrabold: '800',
+                        black: '900'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* === RESET & CORE === */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* === THEME VARIABLES === */
+        :root {
+            --bg-color: #FAFAFA;
+            --bg-secondary: #FFFBEB;
+            --bg-card: #FFFFFF;
+            --text-main: #1C1917;
+            --text-muted: #78716C;
+            --accent-color: #D97706; 
+            --accent-dark: #B45309; 
+            --border-color: #FEF3C7;
+            --nav-bg: rgba(255, 255, 255, 0.85);
+            --drawer-bg: rgba(255, 255, 255, 0.98);
+            --menu-hover-bg: rgba(217, 119, 6, 0.08);
+        }
+
+        /* DARK MODE */
+        body.dark-mode {
+            --bg-color: #1C1917;
+            --bg-secondary: #292524;
+            --bg-card: #292524;
+            --text-main: #FAFAF9;
+            --text-muted: #A8A29E;
+            --accent-color: #F59E0B;
+            --accent-dark: #D97706;
+            --border-color: #44403C;
+            --nav-bg: rgba(41, 37, 36, 0.85);
+            --drawer-bg: rgba(28, 25, 23, 0.98);
+            --menu-hover-bg: rgba(245, 158, 11, 0.15);
+        }
+
+        /* RTL SUPPORT */
+        [dir="rtl"] { text-align: right; }
+        [dir="rtl"] .ml-auto { margin-right: auto; margin-left: 0; }
+        [dir="rtl"] .mr-auto { margin-left: auto; margin-right: 0; }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 5s ease-in-out infinite; }
+
+        /* === REDESIGNED FLOATING GLASSMORPHISM NAVBAR === */
+        .navbar {
+            position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 32px); max-width: 1400px; z-index: 1000;
+            background: var(--nav-bg); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(217, 119, 6, 0.15);
+            border-radius: 16px;
+            padding: 0 16px; height: 70px; display: flex; align-items: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06);
+        }
+        body.dark-mode .navbar {
+            border-color: rgba(245, 158, 11, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .navbar.scrolled {
+            top: 8px; height: 60px; background: var(--bg-card);
+            border-color: var(--border-color);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* === NEW HOVER EFFECT: SOFT TAB BLOCKS === */
+        .nav-link {
+            position: relative; padding: 6px 10px; margin: 0 1px;
+            color: var(--text-main); text-decoration: none; font-size: 13px; font-weight: 600;
+            text-transform: capitalize; letter-spacing: 0.2px; transition: all 0.3s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+            cursor: pointer; border-radius: 6px; z-index: 1; background: transparent;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--menu-hover-bg);
+            color: var(--accent-color);
+            transform: translateY(-1px);
+        }
+        body.dark-mode .nav-link:hover, body.dark-mode .nav-link.active {
+            color: #FDE68A;
+        }
+
+        .dropdown { position: relative; display: flex; align-items: center; height: 100%; }
+        .dropdown-menu {
+            position: absolute; top: calc(100% + 15px); left: 0;
+            transform: translateY(15px) scale(0.95); opacity: 0; visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100; transform-origin: top left;
+        }
+        .dropdown-inner {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
+            min-width: 200px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); padding: 10px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        body.dark-mode .dropdown-inner { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); }
+        .dropdown:hover .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .dropdown-item {
+            display: block; padding: 8px 14px; border-radius: 6px; color: var(--text-main);
+            text-decoration: none; font-size: 12px; font-weight: 500; text-transform: capitalize;
+            transition: all 0.2s; text-align: left; white-space: nowrap;
+        }
+        .dropdown-item:hover { background: var(--menu-hover-bg); color: var(--accent-color); padding-left: 18px; }
+        [dir="rtl"] .dropdown-item:hover { padding-left: 14px; padding-right: 18px; }
+
+        .theme-toggle-pill {
+            width: 64px; height: 28px; background: var(--bg-secondary); border-radius: 6px;
+            position: relative; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 8px; border: 1px solid var(--border-color); margin: 0 4px;
+        }
+        .theme-toggle-pill i { font-size: 10px; z-index: 1; }
+        .theme-toggle-pill .fa-sun { color: #f59e0b; }
+        .theme-toggle-pill .fa-moon { color: #999; }
+        .theme-toggle-pill .thumb {
+            position: absolute; top: 2px; left: 2px; width: 22px; height: 22px;
+            background: white; border-radius: 4px; transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); z-index: 2; border: 1px solid var(--border-color);
+        }
+        body.dark-mode .theme-toggle-pill .thumb { transform: translateX(36px); background: #333; border-color: var(--border-color); }
+
+        .rtl-btn-style {
+            width: 48px; height: 28px; background: var(--bg-secondary); border-radius: 6px;
+            border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center;
+            font-size: 9px; font-weight: 600; cursor: pointer; color: var(--text-main); transition: all 0.3s ease; margin: 0 4px;
+        }
+        .rtl-btn-style:hover { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+
+        /* HERO SECTION BUTTONS */
+        .btn {
+            padding: 12px 28px; font-weight: 600; font-size: 13px; text-transform: capitalize;
+            letter-spacing: 0.5px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+            position: relative; border: 1px solid transparent; border-radius: 50px; text-decoration: none;
+        }
+        .btn-solid { background: var(--accent-color); color: #FFFFFF !important; }
+        .btn-solid:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 8px 20px -3px rgba(217, 119, 6, 0.4); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-outline:hover { border-color: var(--accent-color); color: var(--accent-color) !important; background: var(--menu-hover-bg); transform: translateY(-2px); }
+
+        /* === IDENTICAL DESIGN FOR LOGIN & REGISTER BUTTONS === */
+        .btn-auth {
+            padding: 0 14px;
+            height: 32px;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+            background: transparent;
+            border: 1.5px solid var(--text-main);
+            border-radius: 6px; 
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            min-width: 80px;
+            margin-left: 6px;
+        }
+        body.dark-mode .btn-auth { border-color: var(--border-color); }
+        
+        .btn-auth:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: var(--menu-hover-bg);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
+        }
+
+        .drawer-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 999;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease; backdrop-filter: blur(4px);
+        }
+        .drawer-overlay.active { opacity: 1; visibility: visible; }
+        
+        .fullscreen-menu {
+            position: fixed; top: 0; right: 0; width: 100%; max-width: 400px; height: 100dvh;
+            background: var(--drawer-bg); z-index: 1001; display: flex; flex-direction: column;
+            opacity: 0; visibility: hidden; transform: translateX(100%);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); border-left: 1px solid var(--border-color);
+        }
+        [dir="rtl"] .fullscreen-menu { right: auto; left: 0; transform: translateX(-100%); border-left: none; border-right: 1px solid var(--border-color); }
+        .fullscreen-menu.active { opacity: 1; visibility: visible; transform: translateX(0); }
+        
+        .mobile-link {
+            display: block; width: 100%; padding: 16px 32px; font-size: 1.1rem; font-weight: 600;
+            text-transform: capitalize; letter-spacing: 0.5px; color: var(--text-main);
+            text-decoration: none; transition: all 0.3s; border-bottom: 1px solid var(--border-color);
+        }
+        .mobile-link:hover { color: var(--accent-color); padding-left: 40px; background: var(--menu-hover-bg); }
+        [dir="rtl"] .mobile-link:hover { padding-left: 32px; padding-right: 40px; }
+
+        footer { background: var(--bg-secondary); border-top: 1px solid var(--border-color); padding-top: 80px; }
+        footer h4 { color: var(--text-main); font-weight: 600; font-size: 1.1rem; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        footer a, footer li, footer span { color: var(--text-muted); text-decoration: none; transition: all 0.3s; font-size: 0.95rem; font-weight: 400; }
+        footer a:hover { color: var(--accent-color); }
+        .social-link-circle {
+            width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: center; transition: all 0.3s;
+            color: var(--text-main); background: transparent;
+        }
+        .social-link-circle:hover { background: var(--accent-color); border-color: var(--accent-color); color: #FFFFFF; transform: translateY(-3px); }
+        .footer-bottom { border-top: 1px solid var(--border-color); padding: 32px 0; margin-top: 60px; }
+    </style>
+</head>
+<body>
+
+    <!-- === REDESIGNED NAVBAR === -->
+    <nav class="navbar" id="main-nav">
+        <div class="w-full flex items-center justify-between">
+            <div class="flex items-center flex-shrink-0 mr-2">
+                <a href="index.html" class="inline-flex items-center gap-2 text-lg md:text-xl font-bold tracking-wider whitespace-nowrap" style="color: var(--text-main) !important; text-decoration: none;">
+                    <i class="fas fa-book-reader" style="color: var(--accent-color);"></i>
+                    HomeSchool
+                </a>
+            </div>
+
+            <!-- COMPACT LINKS -->
+            <div class="hidden xl:flex justify-center items-center flex-1">
+                <div class="dropdown">
+                    <div class="nav-link">Home <i class="fas fa-chevron-down text-[8px] ml-1 opacity-50"></i></div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-inner">
+                            <a href="index.html" class="dropdown-item">Home Page 1</a>
+                            <a href="home-2.html" class="dropdown-item">Home Page 2</a>
+                        </div>
+                    </div>
+                </div>
+                <a href="about.html" class="nav-link">About</a>
+                <a href="services.html" class="nav-link">Services</a>
+                <a href="pricing.html" class="nav-link">Pricing</a>
+                <!-- CHANGED TO ACTIVE -->
+                <a href="blog.html" class="nav-link active">Blog</a>
+                <a href="faq.html" class="nav-link">FAQ</a>
+                <a href="contact.html" class="nav-link">Contact</a>
+                <div class="dropdown">
+                    <div class="nav-link">Dashboard <i class="fas fa-chevron-down text-[8px] ml-1 opacity-50"></i></div>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-inner">
+                            <a href="user.html" class="dropdown-item">User Dashboard</a>
+                            <a href="admin.html" class="dropdown-item">Admin Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hidden xl:flex items-center flex-shrink-0 ml-2">
+                <div id="theme-toggle-desktop" class="theme-toggle-pill" title="Toggle Dark Mode">
+                    <i class="fas fa-sun"></i><i class="fas fa-moon"></i>
+                    <div class="thumb"></div>
+                </div>
+                <button id="rtl-btn" class="rtl-btn-style" title="Toggle LTR/RTL">LTR</button>
+                <div class="w-px h-5 bg-[var(--border-color)] mx-1"></div>
+
+                <!-- COMPACT AUTH BUTTONS -->
+                <a href="login.html" class="btn-auth">Login</a>
+                <a href="register.html" class="btn-auth">Register</a>
+            </div>
+
+            <div class="xl:hidden flex items-center justify-end gap-4">
+                <button id="mobile-btn" class="text-2xl text-[var(--text-main)] transition-colors hover:text-[var(--accent-color)]">
+                    <i class="fas fa-bars-staggered"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- === HAMBURGER MENU DRAWER === -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <div class="fullscreen-menu" id="fullscreen-menu">
+        <div class="w-full px-8 py-6 flex justify-between items-center shrink-0 border-b border-[var(--border-color)]">
+            <a href="index.html" class="inline-flex items-center gap-2 text-2xl font-bold tracking-wider" style="color: var(--text-main) !important; text-decoration: none;">
+                <i class="fas fa-book-reader" style="color: var(--accent-color); font-size: 1.4rem;"></i>
+                HomeSchool
+            </a>
+            <button id="close-menu" class="w-10 h-10 rounded-full flex items-center justify-center transition-all text-xl text-[var(--text-main)] hover:bg-[var(--bg-secondary)] hover:text-[var(--accent-color)]">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="flex flex-col w-full overflow-y-auto flex-1 py-4">
+            <a href="index.html" class="mobile-link">Home Page 1</a>
+            <a href="home-2.html" class="mobile-link">Home Page 2</a>
+            <a href="about.html" class="mobile-link">About</a>
+            <a href="services.html" class="mobile-link">Services</a>
+            <a href="pricing.html" class="mobile-link">Pricing</a>
+            <!-- CHANGED TO ACTIVE -->
+            <a href="blog.html" class="mobile-link" style="color: var(--accent-color);">Blog</a>
+            <a href="faq.html" class="mobile-link">FAQ</a>
+            <a href="contact.html" class="mobile-link">Contact</a>
+            <div class="px-8 mt-6 mb-2">
+                <span class="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest">Portals</span>
+            </div>
+            <a href="user.html" class="mobile-link !text-sm text-[var(--text-muted)]">User Dashboard</a>
+            <a href="admin.html" class="mobile-link !text-sm text-[var(--text-muted)]">Admin Dashboard</a>
+        </div>
+
+        <div class="w-full px-8 py-8 border-t border-[var(--border-color)] flex flex-col gap-6 shrink-0 bg-[var(--bg-secondary)]">
+            <div class="flex justify-between items-center w-full">
+                <div class="flex items-center gap-3">
+                    <span class="text-[var(--text-muted)] font-medium text-[10px] uppercase tracking-widest">Theme</span>
+                    <div id="theme-toggle-mobile" class="theme-toggle-pill"><i class="fas fa-sun"></i><i class="fas fa-moon"></i>
+                        <div class="thumb"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-[var(--text-muted)] font-medium text-[10px] uppercase tracking-widest">Dir</span>
+                    <button id="rtl-toggle-mobile" class="rtl-btn-style">LTR</button>
+                </div>
+            </div>
+            <div class="flex gap-4 w-full">
+                <a href="login.html" class="btn-auth flex-1 !h-[48px] !m-0">Login</a>
+                <a href="register.html" class="btn-auth flex-1 !h-[48px] !m-0">Register</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- === BLOG HERO BANNER === -->
+    <section class="relative w-full min-h-[100dvh] pb-16 lg:pb-0 pt-[120px] lg:pt-[140px] flex items-center justify-center overflow-hidden bg-[var(--bg-color)]">
+        
+        <!-- Abstract Background Shapes -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+            <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] rounded-full bg-[var(--accent-color)] opacity-5 blur-[120px] animate-float"></div>
+            <div class="absolute bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] rounded-full bg-[#FBBF24] opacity-5 blur-[100px] animate-float" style="animation-delay: 2s;"></div>
+        </div>
+
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12 w-full flex flex-col lg:flex-row gap-12 lg:gap-8 items-center relative z-10">
+            
+            <!-- Left: Content -->
+            <div class="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
+                
+                <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] mb-8 shadow-sm">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent-color)] opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-[var(--accent-color)]"></span>
+                    </span>
+                    <span class="text-[11px] font-bold uppercase tracking-widest text-[var(--text-main)]">Insights & Resources</span>
+                </div>
+                
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-[5rem] font-black leading-[1.05] mb-6 text-[var(--text-main)] tracking-tight">
+                    The Co-Op <br class="hidden lg:block">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-color)] to-[var(--accent-dark)]">Journal.</span>
+                </h1>
+                
+                <p class="text-[var(--text-muted)] text-base md:text-lg leading-relaxed font-medium mb-10 max-w-xl">
+                    Explore our latest articles, curriculum guides, community highlights, and expert advice to enrich your homeschooling journey and connect with fellow parents.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <a href="#blog-posts" class="btn btn-solid !py-4 !px-8 text-sm shadow-[0_8px_20px_-6px_rgba(217,119,6,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(217,119,6,0.6)]">
+                        Read Latest Posts <i class="fas fa-arrow-down ml-2"></i>
+                    </a>
+                    <a href="#subscribe" class="btn btn-outline !py-4 !px-8 text-sm bg-[var(--bg-card)] flex items-center justify-center">
+                        <i class="fas fa-envelope mr-2 text-[var(--accent-color)] text-lg"></i> Subscribe
+                    </a>
+                </div>
+
+                <div class="mt-12 flex items-center gap-4 border-t border-[var(--border-color)] pt-6 w-full max-w-md justify-center lg:justify-start">
+                    <div class="flex -space-x-3">
+                        <img class="w-10 h-10 rounded-full border-2 border-[var(--bg-card)] object-cover" src="images/pexels-kampus-7079148.jpg" alt="Reader">
+                        <img class="w-10 h-10 rounded-full border-2 border-[var(--bg-card)] object-cover" src="images/pexels-boom-12716037.jpg" alt="Reader">
+                        <img class="w-10 h-10 rounded-full border-2 border-[var(--bg-card)] object-cover" src="images/pexels-kseniachernaya-7695252.jpg" alt="Reader">
+                        <div class="w-10 h-10 rounded-full border-2 border-[var(--bg-card)] bg-[var(--bg-secondary)] flex items-center justify-center text-[10px] font-bold text-[var(--accent-color)]">500+</div>
+                    </div>
+                    <div class="text-sm font-semibold text-[var(--text-main)]">
+                        Active Readers <br> <span class="text-[var(--text-muted)] font-normal text-xs">every single week</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Creative Grid Collage -->
+            <div class="flex-1 w-full relative min-h-[450px] lg:min-h-[650px] flex items-center justify-center mt-10 lg:mt-0">
+                <!-- Center Image (Main) -->
+                <div class="absolute z-20 w-[48%] aspect-[3/4] rounded-[40px] overflow-hidden border-8 border-[var(--bg-card)] shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <img src="images/pexels-cottonbro-7014775.jpg" alt="Reading and Learning" class="w-full h-full object-cover">
+                </div>
+                
+                <!-- Top Left Image (Circular) -->
+                <div class="absolute z-10 w-[42%] aspect-square rounded-full overflow-hidden border-8 border-[var(--bg-card)] shadow-xl top-[2%] left-[2%] transform -rotate-6 hover:scale-105 transition-transform duration-500">
+                    <img src="images/pexels-annushka-ahuja-8055795.jpg" alt="Study Materials" class="w-full h-full object-cover">
+                </div>
+
+                <!-- Bottom Right Image (Rounded Rectangle) -->
+                <div class="absolute z-30 w-[45%] aspect-[4/3] rounded-3xl overflow-hidden border-8 border-[var(--bg-card)] shadow-xl bottom-[8%] right-[0%] transform -rotate-2 hover:scale-105 transition-transform duration-500">
+                    <img src="images/pexels-gustavo-fring-5934550.jpg" alt="Notebooks" class="w-full h-full object-cover">
+                    <!-- Floating Badge -->
+                    <div class="absolute bottom-4 right-4 bg-[var(--bg-card)]/90 backdrop-blur px-3 py-2 rounded-xl shadow-lg border border-[var(--border-color)] flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-[var(--accent-color)]/20 flex items-center justify-center text-[var(--accent-color)]">
+                            <i class="fas fa-newspaper text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase text-[var(--text-main)] leading-tight">Weekly Updates</p>
+                            <p class="text-[9px] text-[var(--text-muted)] font-medium">Fresh content</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- === MAIN CONTENT: BLOG CARDS & RANDOM SECTIONS === -->
+    <main id="blog-posts" class="w-full flex flex-col min-h-[30vh] bg-[var(--bg-color)]">
+        
+        <!-- ==================================================================================== -->
+        <!-- BLOG GRID: 6 UNIQUE NEW BLOG CARDS                                                   -->
+        <!-- ==================================================================================== -->
+        <section class="w-full py-24 bg-[var(--bg-color)] border-b border-[var(--border-color)]">
+            <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+                
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <span class="text-[var(--accent-color)] text-xs font-bold uppercase tracking-widest mb-3 block">Latest Updates</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-[var(--text-main)] mb-6 tracking-tight">Recent Articles</h2>
+                    <div class="w-20 h-1 bg-gradient-to-r from-[var(--accent-color)] to-[var(--accent-dark)] mx-auto rounded-full"></div>
+                </div>
+
+                <!-- items-stretch ensures all cards in a row have the exact same height -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 items-stretch">
+                    
+                    <!-- Blog Card 1 -->
+                    <article class="flex flex-col h-full bg-[var(--bg-card)] rounded-[2rem] border border-[var(--border-color)] p-4 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-400 group">
+                        <div class="relative w-full h-56 rounded-[1.5rem] overflow-hidden mb-6">
+                            <img src="images/pexels-ann-h-45017-38291753.jpg" alt="Blog Image" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute top-4 right-4 bg-[var(--bg-card)] text-[var(--text-main)] text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10">
+                                Oct 12, 2026
+                            </div>
+                        </div>
+                        <div class="flex flex-col flex-1 px-4 pb-4">
+                            <span class="text-[var(--accent-color)] text-[10px] uppercase font-bold tracking-widest mb-2">Curriculum</span>
+                            <h3 class="text-xl font-bold text-[var(--text-main)] mb-3 leading-snug">Structuring Your Home Classroom for Success</h3>
+                            <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-8 flex-1 font-medium">Discover proven organizational layouts to minimize distractions and maximize your student's daily focus.</p>
+                            <!-- mt-auto anchors the button to the bottom -->
+                            <a href="services-details.html" class="mt-auto block w-full text-center py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-main)] font-bold text-sm uppercase hover:bg-[var(--accent-color)] hover:text-white hover:border-[var(--accent-color)] transition-colors">
+                                Enquire Now
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Blog Card 2 -->
+                    <article class="flex flex-col h-full bg-[var(--bg-card)] rounded-[2rem] border border-[var(--border-color)] p-4 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-400 group">
+                        <div class="relative w-full h-56 rounded-[1.5rem] overflow-hidden mb-6">
+                            <img src="images/pexels-rdne-8799244.jpg" alt="Blog Image" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute top-4 right-4 bg-[var(--bg-card)] text-[var(--text-main)] text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10">
+                                Oct 08, 2026
+                            </div>
+                        </div>
+                        <div class="flex flex-col flex-1 px-4 pb-4">
+                            <span class="text-[var(--accent-color)] text-[10px] uppercase font-bold tracking-widest mb-2">Socialization</span>
+                            <h3 class="text-xl font-bold text-[var(--text-main)] mb-3 leading-snug">The Truth About Homeschool Socialization</h3>
+                            <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-8 flex-1 font-medium">Debunking common myths. Learn how Co-Ops actually provide richer, multi-aged social environments.</p>
+                            <a href="services-details.html" class="mt-auto block w-full text-center py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-main)] font-bold text-sm uppercase hover:bg-[var(--accent-color)] hover:text-white hover:border-[var(--accent-color)] transition-colors">
+                                Enquire Now
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Blog Card 3 -->
+                    <article class="flex flex-col h-full bg-[var(--bg-card)] rounded-[2rem] border border-[var(--border-color)] p-4 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-400 group">
+                        <div class="relative w-full h-56 rounded-[1.5rem] overflow-hidden mb-6">
+                            <img src="images/pexels-gustavo-fring-4173337.jpg" alt="Blog Image" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute top-4 right-4 bg-[var(--bg-card)] text-[var(--text-main)] text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10">
+                                Sep 28, 2026
+                            </div>
+                        </div>
+                        <div class="flex flex-col flex-1 px-4 pb-4">
+                            <span class="text-[var(--accent-color)] text-[10px] uppercase font-bold tracking-widest mb-2">Science & Lab</span>
+                            <h3 class="text-xl font-bold text-[var(--text-main)] mb-3 leading-snug">Making High School Chemistry Accessible</h3>
+                            <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-8 flex-1 font-medium">Why utilizing shared Co-Op lab spaces saves money and ensures maximum safety during high school lab work.</p>
+                            <a href="services-details.html" class="mt-auto block w-full text-center py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-main)] font-bold text-sm uppercase hover:bg-[var(--accent-color)] hover:text-white hover:border-[var(--accent-color)] transition-colors">
+                                Enquire Now
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Blog Card 4 -->
+                    <article class="flex flex-col h-full bg-[var(--bg-card)] rounded-[2rem] border border-[var(--border-color)] p-4 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-400 group">
+                        <div class="relative w-full h-56 rounded-[1.5rem] overflow-hidden mb-6">
+                            <img src="images/pexels-sofatutor-95841679-9240632.jpg" alt="Blog Image" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute top-4 right-4 bg-[var(--bg-card)] text-[var(--text-main)] text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10">
+                                Sep 15, 2026
+                            </div>
+                        </div>
+                        <div class="flex flex-col flex-1 px-4 pb-4">
+                            <span class="text-[var(--accent-color)] text-[10px] uppercase font-bold tracking-widest mb-2">Parenting</span>
+                            <h3 class="text-xl font-bold text-[var(--text-main)] mb-3 leading-snug">Avoiding Burnout as a Parent-Teacher</h3>
+                            <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-8 flex-1 font-medium">Essential tips for maintaining your mental health and drawing boundaries when your home is also the school.</p>
+                            <a href="services-details.html" class="mt-auto block w-full text-center py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-main)] font-bold text-sm uppercase hover:bg-[var(--accent-color)] hover:text-white hover:border-[var(--accent-color)] transition-colors">
+                                Enquire Now
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Blog Card 5 -->
+                    <article class="flex flex-col h-full bg-[var(--bg-card)] rounded-[2rem] border border-[var(--border-color)] p-4 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-400 group">
+                        <div class="relative w-full h-56 rounded-[1.5rem] overflow-hidden mb-6">
+                            <img src="images/pexels-tima-miroshnichenko-5303550.jpg" alt="Blog Image" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute top-4 right-4 bg-[var(--bg-card)] text-[var(--text-main)] text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10">
+                                Sep 02, 2026
+                            </div>
+                        </div>
+                        <div class="flex flex-col flex-1 px-4 pb-4">
+                            <span class="text-[var(--accent-color)] text-[10px] uppercase font-bold tracking-widest mb-2">Extracurriculars</span>
+                            <h3 class="text-xl font-bold text-[var(--text-main)] mb-3 leading-snug">Integrating Fine Arts into Daily Lessons</h3>
+                            <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-8 flex-1 font-medium">How to seamlessly blend painting, music, and digital arts into history and math curriculums.</p>
+                            <a href="services-details.html" class="mt-auto block w-full text-center py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-main)] font-bold text-sm uppercase hover:bg-[var(--accent-color)] hover:text-white hover:border-[var(--accent-color)] transition-colors">
+                                Enquire Now
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Blog Card 6 -->
+                    <article class="flex flex-col h-full bg-[var(--bg-card)] rounded-[2rem] border border-[var(--border-color)] p-4 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-400 group">
+                        <div class="relative w-full h-56 rounded-[1.5rem] overflow-hidden mb-6">
+                            <img src="images/pexels-august-de-richelieu-4260477.jpg" alt="Blog Image" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110">
+                            <div class="absolute top-4 right-4 bg-[var(--bg-card)] text-[var(--text-main)] text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10">
+                                Aug 21, 2026
+                            </div>
+                        </div>
+                        <div class="flex flex-col flex-1 px-4 pb-4">
+                            <span class="text-[var(--accent-color)] text-[10px] uppercase font-bold tracking-widest mb-2">Community</span>
+                            <h3 class="text-xl font-bold text-[var(--text-main)] mb-3 leading-snug">The Value of Multi-Age Learning Spaces</h3>
+                            <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-8 flex-1 font-medium">Why keeping older and younger siblings learning in proximity accelerates empathy and leadership skills.</p>
+                            <a href="services-details.html" class="mt-auto block w-full text-center py-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-main)] font-bold text-sm uppercase hover:bg-[var(--accent-color)] hover:text-white hover:border-[var(--accent-color)] transition-colors">
+                                Enquire Now
+                            </a>
+                        </div>
+                    </article>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================================== -->
+        <!-- RANDOM SECTION 1: EDUCATOR SPOTLIGHT (~50 Lines)                                     -->
+        <!-- ==================================================================================== -->
+        <section class="w-full py-24 bg-[var(--bg-secondary)] border-b border-[var(--border-color)]">
+            <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+                <div class="bg-[var(--bg-card)] rounded-[3rem] border border-[var(--border-color)] p-8 lg:p-12 shadow-xl flex flex-col lg:flex-row gap-12 items-center">
+                    <div class="relative w-full lg:w-2/5 aspect-square max-h-[400px] rounded-[2rem] overflow-hidden border-4 border-[var(--bg-secondary)] shadow-inner">
+                        <img src="images/pexels-mart-production-8472804.jpg" alt="Educator Spotlight" class="w-full h-full object-cover">
+                        <div class="absolute bottom-4 left-4 bg-[var(--accent-color)] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide shadow-md">Monthly Feature</div>
+                    </div>
+                    <div class="w-full lg:w-3/5 flex flex-col items-start">
+                        <span class="text-[var(--accent-color)] text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2"><i class="fas fa-star"></i> Educator Spotlight</span>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-[var(--text-main)] mb-4">Meet Sarah Jenkins: Integrating Nature into Math</h2>
+                        <i class="fas fa-quote-left text-3xl text-[var(--border-color)] mb-4 opacity-50"></i>
+                        <p class="text-[var(--text-muted)] text-lg leading-relaxed mb-6 font-medium italic">
+                            "When we step outside the traditional classroom box, numbers suddenly make sense to children. Taking math into the woods completely transformed my son's understanding of geometry and volume."
+                        </p>
+                        <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-8">
+                            Sarah has been part of our Co-Op for four years. This month, she shares her unique curriculum methodology that combines outdoor exploration with standardized math requirements.
+                        </p>
+                        <a href="#" class="btn btn-outline bg-[var(--bg-secondary)] border-[var(--border-color)]">Read Sarah's Full Interview <i class="fas fa-arrow-right ml-2 text-xs"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================================================================================== -->
+        <!-- RANDOM SECTION 2: NEWSLETTER SUBSCRIPTION (~50 Lines)                                -->
+        <!-- ==================================================================================== -->
+        <section id="subscribe" class="w-full py-32 bg-[#1C1917] relative overflow-hidden flex items-center justify-center">
+            <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+                <img src="images/pexels-mikhail-nilov-8121107.jpg" alt="Newsletter Background" class="w-full h-full object-cover">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#1C1917] to-transparent z-0"></div>
+            
+            <div class="max-w-[800px] mx-auto px-6 lg:px-12 relative z-10 text-center">
+                <div class="w-20 h-20 mx-auto bg-[var(--accent-color)] rounded-full flex items-center justify-center text-white text-3xl mb-8 shadow-[0_0_40px_rgba(217,119,6,0.6)]">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <h2 class="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight">Don't Miss an Update</h2>
+                <p class="text-gray-300 text-lg leading-relaxed mb-10 font-medium">
+                    Join 2,000+ other homeschooling parents. Get our weekly roundup of the best curriculum tips, free printables, and upcoming co-op events delivered straight to your inbox.
+                </p>
+                <form class="w-full max-w-xl mx-auto flex flex-col sm:flex-row gap-3">
+                    <input type="email" placeholder="Enter your email address" required class="flex-1 bg-white/10 border border-white/20 text-white rounded-xl px-6 py-4 placeholder-gray-400 focus:outline-none focus:border-[var(--accent-color)] transition-colors">
+                    <button type="submit" class="btn btn-solid !py-4 !px-8 text-base shrink-0 border-none shadow-[0_4px_15px_-3px_rgba(217,119,6,0.5)]">
+                        Subscribe Now
+                    </button>
+                </form>
+                <p class="text-gray-500 text-xs mt-6 uppercase tracking-widest font-semibold">No spam. Unsubscribe anytime.</p>
+            </div>
+        </section>
+
+        <!-- ==================================================================================== -->
+        <!-- RANDOM SECTION 3: POPULAR TOPICS / CATEGORIES (~50 Lines)                            -->
+        <!-- ==================================================================================== -->
+        <section class="w-full py-24 bg-[var(--bg-color)] border-b border-[var(--border-color)]">
+            <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <span class="text-[var(--accent-color)] text-xs font-bold uppercase tracking-widest mb-3 block">Browse by Subject</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-[var(--text-main)] mb-6 tracking-tight">Popular Topics</h2>
+                    <div class="w-16 h-1 bg-[var(--accent-color)] mx-auto rounded-full"></div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
+                    <a href="#" class="flex flex-col items-center justify-center text-center p-8 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl hover:bg-[var(--accent-color)] hover:text-white transition-colors duration-300 group cursor-pointer">
+                        <i class="fas fa-book text-4xl text-[var(--accent-color)] mb-4 group-hover:text-white transition-colors"></i>
+                        <h4 class="font-bold text-lg mb-1 text-[var(--text-main)] group-hover:text-white">Curriculum</h4>
+                        <span class="text-xs font-medium text-[var(--text-muted)] group-hover:text-white/80">45 Articles</span>
+                    </a>
+                    <a href="#" class="flex flex-col items-center justify-center text-center p-8 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl hover:bg-[var(--accent-color)] hover:text-white transition-colors duration-300 group cursor-pointer">
+                        <i class="fas fa-microscope text-4xl text-[var(--accent-color)] mb-4 group-hover:text-white transition-colors"></i>
+                        <h4 class="font-bold text-lg mb-1 text-[var(--text-main)] group-hover:text-white">STEM Labs</h4>
+                        <span class="text-xs font-medium text-[var(--text-muted)] group-hover:text-white/80">28 Articles</span>
+                    </a>
+                    <a href="#" class="flex flex-col items-center justify-center text-center p-8 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl hover:bg-[var(--accent-color)] hover:text-white transition-colors duration-300 group cursor-pointer">
+                        <i class="fas fa-bus text-4xl text-[var(--accent-color)] mb-4 group-hover:text-white transition-colors"></i>
+                        <h4 class="font-bold text-lg mb-1 text-[var(--text-main)] group-hover:text-white">Field Trips</h4>
+                        <span class="text-xs font-medium text-[var(--text-muted)] group-hover:text-white/80">19 Articles</span>
+                    </a>
+                    <a href="#" class="flex flex-col items-center justify-center text-center p-8 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl hover:bg-[var(--accent-color)] hover:text-white transition-colors duration-300 group cursor-pointer">
+                        <i class="fas fa-child text-4xl text-[var(--accent-color)] mb-4 group-hover:text-white transition-colors"></i>
+                        <h4 class="font-bold text-lg mb-1 text-[var(--text-main)] group-hover:text-white">Parenting</h4>
+                        <span class="text-xs font-medium text-[var(--text-muted)] group-hover:text-white/80">34 Articles</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- === FOOTER === -->
+    <footer>
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-10 pt-4">
+                <div class="lg:col-span-4">
+                    <div class="mb-6">
+                        <a href="index.html" class="inline-flex items-center gap-2 text-2xl font-bold tracking-wider" style="color: var(--text-main) !important; text-decoration: none;">
+                            <i class="fas fa-book-reader" style="color: var(--accent-color); font-size: 1.4rem;"></i>
+                            HomeSchool
+                        </a>
+                    </div>
+                    <p class="opacity-80 leading-relaxed text-sm font-medium mb-8 max-w-sm" style="color: var(--text-muted);">
+                        Dedicated to providing educational resources, collaborative classes, and community support for homeschooling families. Empowering parents and inspiring students every day.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="social-link-circle"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link-circle"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link-circle"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link-circle"><i class="fab fa-pinterest-p"></i></a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-8">
+                    <!-- EXACT FILE REDIRECTS USED FOR FOOTER TOO -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+                        <div>
+                            <h4>Parent Portal</h4>
+                            <ul class="space-y-4">
+                                <li><a href="login.html">Member Login</a></li>
+                                <li><a href="user.html">Family Dashboard</a></li>
+                                <li><a href="pricing.html">Membership Plans</a></li>
+                                <li><a href="blog.html">Educational Blog</a></li>
+                                <li><a href="faq.html">Co-Op FAQ</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4>Resources</h4>
+                            <ul class="space-y-4">
+                                <li><a href="services.html">Curriculum Library</a></li>
+                                <li><a href="services.html">Group Classes</a></li>
+                                <li><a href="services.html">Field Trips</a></li>
+                                <li><a href="services.html">Tutoring Sessions</a></li>
+                                <li><a href="services.html">Parent Workshops</a></li>
+                            </ul>
+                        </div>
+                        <div class="sm:col-span-2 md:col-span-1">
+                            <h4>Center Location</h4>
+                            <ul class="space-y-4 text-[var(--text-muted)] text-sm font-medium">
+                                <li class="flex items-start gap-4">
+                                    <i class="fas fa-map-marker-alt mt-1 shrink-0" style="color: var(--accent-color);"></i>
+                                    <span>456 Learning Way<br>Education City, TX 75002</span>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <i class="fas fa-phone shrink-0" style="color: var(--accent-color);"></i>
+                                    <a href="tel:+15551234" class="break-all hover:text-[var(--accent-color)]">+1 (555) 123-COOP</a>
+                                </li>
+                                <li class="flex items-center gap-4">
+                                    <i class="fas fa-envelope shrink-0" style="color: var(--accent-color);"></i>
+                                    <a href="contact.html" class="break-all hover:text-[var(--accent-color)]">hello@homeschoolcoop.org</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom flex flex-col md:flex-row justify-between items-center text-xs gap-6 font-semibold uppercase tracking-widest">
+                <p style="color: var(--text-muted);">&copy; 2026 Homeschool Co-Op & Resource Center. All rights reserved.</p>
+                <div class="flex flex-wrap justify-center gap-6 sm:gap-8">
+                    <a href="#">Membership Terms</a>
+                    <a href="#">Code of Conduct</a>
+                    <a href="#">Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- === JAVASCRIPT CORE === -->
+    <script>
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('main-nav');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        const mobileBtn = document.getElementById('mobile-btn');
+        const fullscreenMenu = document.getElementById('fullscreen-menu');
+        const closeMenu = document.getElementById('close-menu');
+        const drawerOverlay = document.getElementById('drawer-overlay');
+
+        function toggleMenu() {
+            fullscreenMenu.classList.toggle('active');
+            drawerOverlay.classList.toggle('active');
+            document.body.style.overflow = fullscreenMenu.classList.contains('active') ? 'hidden' : 'auto';
+        }
+        mobileBtn.onclick = toggleMenu;
+        closeMenu.onclick = toggleMenu;
+        drawerOverlay.onclick = toggleMenu;
+
+        const themeDesktop = document.getElementById('theme-toggle-desktop');
+        const themeMobile = document.getElementById('theme-toggle-mobile');
+        const theme = localStorage.getItem('theme') || 'light';
+
+        function updateThemeUI(isDark) {
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                if (themeMobile) themeMobile.classList.add('active');
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (themeMobile) themeMobile.classList.remove('active');
+            }
+        }
+        updateThemeUI(theme === 'dark');
+
+        function toggleTheme() {
+            const isDark = !document.body.classList.contains('dark-mode');
+            updateThemeUI(isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+        themeDesktop.onclick = toggleTheme;
+        if (themeMobile) themeMobile.onclick = toggleTheme;
+
+        const rtlBtn = document.getElementById('rtl-btn');
+        const rtlMobile = document.getElementById('rtl-toggle-mobile');
+        const dir = localStorage.getItem('dir') || 'ltr';
+
+        function updateRTLUI(currentDir) {
+            const isRTL = currentDir === 'rtl';
+            if (rtlBtn) rtlBtn.innerText = isRTL ? 'RTL' : 'LTR';
+            if (rtlMobile) rtlMobile.innerText = isRTL ? 'RTL' : 'LTR';
+        }
+        if (dir === 'rtl') {
+            document.documentElement.dir = 'rtl';
+        }
+        updateRTLUI(dir);
+
+        function toggleRTL() {
+            const isRTL = document.documentElement.dir === 'rtl';
+            const newDir = isRTL ? 'ltr' : 'rtl';
+            document.documentElement.dir = newDir;
+            localStorage.setItem('dir', newDir);
+            updateRTLUI(newDir);
+        }
+        if (rtlBtn) rtlBtn.onclick = toggleRTL;
+        if (rtlMobile) rtlMobile.onclick = toggleRTL;
+    </script>
+</body>
+</html>
