@@ -47,14 +47,14 @@
         /* === HOMESCHOOL CO-OP THEME VARIABLES === */
         :root {
             /* Immersive Glass Backgrounds */
-            --bg-card: rgba(255, 255, 255, 0.85);
+            --bg-card: rgba(255, 255, 255, 0.80);
             --card-border: rgba(255, 255, 255, 0.6);
             --text-main: #1C1917;
             --text-muted: #78716C;
 
             /* Inputs */
-            --input-bg: rgba(255, 255, 255, 0.7);
-            --input-border: rgba(229, 231, 235, 0.8);
+            --input-bg: rgba(255, 255, 255, 0.6);
+            --input-border: rgba(255, 255, 255, 0.8);
             --input-focus-bg: rgba(255, 255, 255, 1);
             --input-text: #1C1917;
             --input-icon: #A8A29E;
@@ -67,21 +67,21 @@
             --accent-dark: #B45309; 
             --btn-text: #FFFFFF;
 
-            --radius: 24px;
-            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-            --btn-shadow: 0 4px 10px 0 rgba(217, 119, 6, 0.3);
-            --btn-shadow-hover: 0 8px 15px -3px rgba(217, 119, 6, 0.5);
+            --radius: 32px;
+            --shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+            --btn-shadow: 0 6px 16px -2px rgba(217, 119, 6, 0.3);
+            --btn-shadow-hover: 0 12px 24px -4px rgba(217, 119, 6, 0.5);
         }
 
         /* DARK MODE */
         body.dark-mode {
-            --bg-card: rgba(28, 25, 23, 0.85);
+            --bg-card: rgba(28, 25, 23, 0.75);
             --card-border: rgba(68, 64, 60, 0.6);
             --text-main: #FAFAF9;
             --text-muted: #A8A29E;
 
-            --input-bg: rgba(0, 0, 0, 0.4);
-            --input-border: rgba(68, 64, 60, 0.8);
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --input-border: rgba(255, 255, 255, 0.1);
             --input-focus-bg: rgba(28, 25, 23, 0.95);
             --input-text: #FAFAF9;
             --input-icon: #78716C;
@@ -93,46 +93,18 @@
             --accent-dark: #D97706;
             --btn-text: #1C1917;
 
-            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-            --btn-shadow: 0 4px 10px 0 rgba(245, 158, 11, 0.2);
-            --btn-shadow-hover: 0 8px 15px -3px rgba(245, 158, 11, 0.4);
+            --shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            --btn-shadow: 0 6px 16px -2px rgba(245, 158, 11, 0.3);
+            --btn-shadow-hover: 0 12px 24px -4px rgba(245, 158, 11, 0.5);
         }
 
         body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.4s ease, color 0.4s ease;
             display: flex;
             flex-direction: column;
             position: relative;
-        }
-
-        /* FULL SCREEN IMMERSIVE BACKGROUND */
-        .auth-bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-        }
-
-        .auth-bg img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 10s ease-out;
-            animation: slowZoom 20s infinite alternate;
-        }
-
-        .auth-bg-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(28, 25, 23, 0.8) 0%, rgba(28, 25, 23, 0.5) 100%);
-            transition: background 0.4s ease;
-        }
-
-        body.dark-mode .auth-bg-overlay {
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(28, 25, 23, 0.8) 100%);
-        }
-
-        @keyframes slowZoom {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
         }
 
         /* RTL SUPPORT */
@@ -162,13 +134,14 @@
         .toggle {
             width: 40px;
             height: 22px;
-            background: var(--toggle-bg);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 50px;
             position: relative;
             cursor: pointer;
             transition: 0.3s;
             flex-shrink: 0;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .toggle::before {
@@ -176,39 +149,37 @@
             position: absolute;
             width: 16px;
             height: 16px;
-            background: white;
+            background: var(--text-muted);
             border-radius: 50%;
             top: 2px;
             left: 3px;
             transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         body.dark-mode .toggle::before {
             left: 19px;
             background: var(--accent-color);
-            box-shadow: none;
         }
 
         .top-btn-text {
             font-size: 0.65rem;
             font-weight: 800;
-            color: var(--page-text);
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-main);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             padding: 6px 12px;
             border-radius: 50px;
             cursor: pointer;
             transition: 0.3s;
             text-transform: uppercase;
             letter-spacing: 1px;
-            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .top-btn-text:hover {
             border-color: var(--accent-color);
             color: var(--accent-color);
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--bg-secondary);
         }
 
         /* MAIN WRAPPER - CENTERED */
@@ -224,21 +195,28 @@
 
         /* FROSTED GLASS CARD */
         .register-card {
-            background: var(--bg-card);
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(255,255,255,0.4) 100%);
             border: 1px solid var(--card-border);
+            border-top: 1px solid rgba(255, 255, 255, 0.9);
+            border-left: 1px solid rgba(255, 255, 255, 0.8);
             border-radius: var(--radius);
             padding: clamp(1.5rem, 3.5vh, 2.25rem) 2rem;
             width: 100%;
             max-width: 480px;
             box-shadow: var(--shadow);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             display: flex;
             flex-direction: column;
             gap: clamp(12px, 2vh, 18px);
             position: relative;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        body.dark-mode .register-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(0,0,0,0.5) 100%);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         @keyframes slideUp {
@@ -327,36 +305,47 @@
             width: 100%;
             height: clamp(40px, 5vh, 46px);
             padding: 0 14px 0 38px;
-            border: 1.5px solid var(--input-border);
+            border: 2px solid var(--input-border);
             background-color: var(--input-bg);
             color: var(--input-text);
-            border-radius: 12px;
+            border-radius: 16px;
             font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 600;
             font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin: 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            backdrop-filter: blur(10px);
         }
 
         .input-field::placeholder {
             color: var(--input-icon);
-            opacity: 1;
-            font-weight: 400;
+            opacity: 0.9;
+            font-weight: 500;
         }
 
         .input-field:hover {
-            border-color: #A8A29E;
+            border-color: rgba(217, 119, 6, 0.4);
+            background-color: var(--input-focus-bg);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05), inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        body.dark-mode .input-field:hover {
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2), inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .input-field:focus {
             outline: none;
             border-color: var(--accent-color);
             background-color: var(--input-focus-bg);
-            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.12);
+            box-shadow: 0 6px 16px rgba(217, 119, 6, 0.15), inset 0 2px 4px rgba(0,0,0,0.02);
+            transform: translateY(-2px);
         }
 
         body.dark-mode .input-field:focus {
-            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.2), inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .input-field:focus+.input-icon,
@@ -441,32 +430,42 @@
         .auth-btn {
             width: 100%;
             height: clamp(44px, 5vh, 48px);
-            background: var(--accent-color);
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
             color: var(--btn-text);
             border: none;
             border-radius: 50px;
             font-size: 0.9rem;
-            font-weight: 700;
+            font-weight: 800;
             font-family: 'Inter', sans-serif;
-            text-transform: none;
-            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             box-shadow: var(--btn-shadow);
-            margin-top: 6px;
+            margin-top: 8px;
         }
 
         .auth-btn:hover {
-            background: var(--accent-dark);
+            background: linear-gradient(135deg, #F59E0B, var(--accent-dark));
             box-shadow: var(--btn-shadow-hover);
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.01);
         }
 
-        .auth-btn:active { transform: translateY(0); }
+        .auth-btn:active {
+            transform: translateY(0) scale(0.99);
+        }
+
+        body.dark-mode .auth-btn {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-dark));
+        }
+
+        body.dark-mode .auth-btn:hover {
+            background: linear-gradient(135deg, #FCD34D, var(--accent-color));
+        }
 
         /* DIVIDER */
         .divider {
@@ -584,18 +583,12 @@
 
 <body>
 
-    <!-- NEW UNIQUE DESIGN: IMMERSIVE FULL-SCREEN BACKGROUND -->
-    <div class="auth-bg">
-        <img src="images/pexels-august-de-richelieu-4260314.jpg" alt="Homeschool Learning Background">
-        <div class="auth-bg-overlay"></div>
-    </div>
-
     <!-- TOP BAR -->
     <div class="top-bar">
         <div class="flex items-center gap-2" style="cursor: pointer;" onclick="document.getElementById('theme-toggle').click()">
-            <i class="fas fa-sun text-xs" style="color: var(--page-text); transition: color 0.3s;"></i>
+            <i class="fas fa-sun text-xs" style="color: var(--text-main); transition: color 0.3s;"></i>
             <div class="toggle" id="theme-toggle"></div>
-            <i class="fas fa-moon text-xs" style="color: var(--page-text); transition: color 0.3s;"></i>
+            <i class="fas fa-moon text-xs" style="color: var(--text-main); transition: color 0.3s;"></i>
         </div>
         <button id="rtl-toggle" class="top-btn-text">RTL Mode</button>
     </div>
